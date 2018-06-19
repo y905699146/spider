@@ -4,6 +4,8 @@
 typedef enum{ LEPT_NULL,LEPT_FALSE,LEPT_TRUE,LEPT_NUMBER,LEPT_STRING,LEPT_ARRAY,LEPT_OBJECT} lept_type;
 
 typedef struct{
+	char *s;       //表示字符
+	size_t len;
 	double n;     //用n去表示数字
 	lept_type type;
 }lept_value;
