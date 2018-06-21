@@ -2,16 +2,40 @@
 #include<stdlib.h>
 #include<math.h>
 #include<errno.h>
+#include<string.h>
 #include"leptjson.h"
+
 
 #define EXPECT(c,ch) do{ assert(*c->json==(ch)); c->json++; }while(0)
 #define ISDIGIT(ch) ((ch)>='0'&&(ch)<='9')
 #define ISDIGIT1TO9 ((ch)>='1'&&(ch)<='9')
-
+#define PUTC(c,ch) do{ *(char*)lept_context_push(c,sizeof(char))==(ch); }while(0)
 typedef struct{
+	char* stack;
+	size_t size,top;
 	const char* json;
 }lept_context;
 
+static void* lept_context_push(lept_context* c,size_t size){
+	void* ret;
+	assert(size>0);
+	if(c->top + size>=c->size)
+	{
+		if(c->size==0)
+			c->size=LEPT_PARSE_STACK_INIT_SIZE;
+		while(c->top+size>=c->size)
+			c->size+=c->size>>1;
+		c->stack=(char*)realloc(c->stack,c->size);
+	}
+	ret=c->stack+c->top;
+	c->top +=size;
+	return ret;
+}
+static void* lept_context_pop(lept_context* c,size_t size)
+{
+	assert(c->top >=size);
+	return c->stack + (c->top -=size);
+}
 int lept_parse(lept_value* v,const char* json)
 {
 	lept_context c;
@@ -74,6 +98,21 @@ static int lept_parse_number(lept_context* c,lept_value* v)
     c->json = p;
     return LEPT_PARSE_OK;
 } 
+
+static int lept_parse_string(lept_context* c,lept_value* v)
+{
+	size_t head=c->top,len;
+	const char* p;
+	p=c->json;
+	for(;;)
+	{
+		char ch=*p++;
+		switch(ch)
+		{
+			case '\"':
+		}
+	}
+}
 
 static int lept_parse_value(lept_context* c,lept_value* v)
 {
